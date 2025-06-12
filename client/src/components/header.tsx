@@ -23,7 +23,12 @@ export default function Header() {
 
   const navigateToAuth = (mode: 'login' | 'signup') => {
     console.log('Header navigation clicked:', mode);
-    setLocation(`/auth?mode=${mode}`);
+    // Use window.history to preserve query parameters
+    window.history.pushState({}, '', `/auth?mode=${mode}`);
+    // Force navigation to auth page - wouter will handle the route
+    setLocation('/auth');
+    // Dispatch a custom event to trigger auth page re-render
+    window.dispatchEvent(new CustomEvent('authModeChange'));
   };
 
   const { data: cartItems = [] } = useQuery<PromptWithDetails[]>({

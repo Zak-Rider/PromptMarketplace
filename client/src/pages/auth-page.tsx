@@ -17,14 +17,34 @@ type RegisterFormData = z.infer<typeof insertUserSchema>;
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
   const { loginMutation, registerMutation, user } = useAuth();
   
-  // Determine mode directly from URL parameters using wouter location
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  // Listen for URL changes to force re-render
+  useEffect(() => {
+    const handlePopState = () => {
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    const handleAuthModeChange = () => {
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('authModeChange', handleAuthModeChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('authModeChange', handleAuthModeChange);
+    };
+  }, []);
+  
+  // Determine mode directly from URL parameters using window.location
+  const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode');
   const isLogin = mode !== 'signup';
   
-  console.log('Auth page render - location:', location, 'mode:', mode, 'isLogin:', isLogin);
+  console.log('Auth page render - window.location.search:', window.location.search, 'mode:', mode, 'isLogin:', isLogin);
   
   // Redirect if already logged in
   if (user) {
@@ -259,7 +279,8 @@ export default function AuthPage() {
                 onClick={() => {
                   const newUrl = isLogin ? '/auth?mode=signup' : '/auth?mode=login';
                   console.log('Form toggle button clicked, navigating to:', newUrl);
-                  setLocation(newUrl);
+                  window.history.pushState({}, '', newUrl);
+                  window.dispatchEvent(new CustomEvent('authModeChange'));
                 }}
                 className="text-ut-orange hover:text-ut-orange/80"
               >
