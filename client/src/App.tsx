@@ -19,8 +19,9 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/browse" component={Browse} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/favorites" component={Favorites} />
+      <ProtectedRoute path="/cart" component={Cart} />
+      <ProtectedRoute path="/favorites" component={Favorites} />
+      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -30,14 +31,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-soft-gray">
-          <Header />
-          <main>
-            <Router />
-          </main>
-          <Footer />
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <div className="min-h-screen bg-soft-gray">
+            <Header />
+            <main>
+              <Router />
+            </main>
+            <Footer />
+          </div>
+          <Toaster />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

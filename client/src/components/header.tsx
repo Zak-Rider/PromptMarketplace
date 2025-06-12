@@ -4,12 +4,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { Brain, Search, Heart, ShoppingCart, Menu, X } from "lucide-react";
+import { Brain, Search, Heart, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const [location] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logoutMutation } = useAuth();
 
   const { data: cartItems = [] } = useQuery({
     queryKey: ["/api/cart"],
@@ -87,12 +96,43 @@ export default function Header() {
             </Link>
             
             <div className="hidden sm:flex items-center space-x-3">
-              <Button variant="outline" className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
-                Sign In
-              </Button>
-              <Button className="bg-ut-orange text-white hover:bg-ut-orange/90">
-                Sign Up
-              </Button>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2 text-oxford-blue hover:text-ut-orange">
+                      <User className="w-4 h-4" />
+                      <span>{user.username}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem>
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => logoutMutation.mutate()}
+                      disabled={logoutMutation.isPending}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link href="/auth">
+                    <Button variant="outline" className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/auth">
+                    <Button className="bg-ut-orange text-white hover:bg-ut-orange/90">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
             
             <Button
