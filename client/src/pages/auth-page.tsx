@@ -17,17 +17,31 @@ type RegisterFormData = z.infer<typeof insertUserSchema>;
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [mode, setMode] = useState<string | null>(null);
   const { loginMutation, registerMutation, user } = useAuth();
   
-  // Listen for URL changes to force re-render
+  // Handle URL parameters and redirects in useEffect
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlMode = urlParams.get('mode');
+    setMode(urlMode);
+    
+    // Redirect if already logged in
+    if (user) {
+      setLocation("/dashboard");
+      return;
+    }
+    
     const handlePopState = () => {
-      setForceUpdate(prev => prev + 1);
+      const newUrlParams = new URLSearchParams(window.location.search);
+      const newMode = newUrlParams.get('mode');
+      setMode(newMode);
     };
     
     const handleAuthModeChange = () => {
-      setForceUpdate(prev => prev + 1);
+      const newUrlParams = new URLSearchParams(window.location.search);
+      const newMode = newUrlParams.get('mode');
+      setMode(newMode);
     };
     
     window.addEventListener('popstate', handlePopState);
@@ -37,19 +51,13 @@ export default function AuthPage() {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('authModeChange', handleAuthModeChange);
     };
-  }, []);
+  }, [user, setLocation]);
   
-  // Determine mode directly from URL parameters using window.location
-  const urlParams = new URLSearchParams(window.location.search);
-  const mode = urlParams.get('mode');
   const isLogin = mode !== 'signup';
   
-
-  
-  // Redirect if already logged in
-  if (user) {
-    setLocation("/");
-    return null;
+  // Don't render until mode is determined
+  if (mode === null) {
+    return <div>Loading...</div>;
   }
 
   const loginForm = useForm<LoginFormData>({
@@ -70,19 +78,11 @@ export default function AuthPage() {
   });
 
   const onLoginSubmit = (data: LoginFormData) => {
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        setLocation("/");
-      },
-    });
+    loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: RegisterFormData) => {
-    registerMutation.mutate(data, {
-      onSuccess: () => {
-        setLocation("/");
-      },
-    });
+    registerMutation.mutate(data);
   };
 
   return (
