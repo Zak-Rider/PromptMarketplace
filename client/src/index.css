@@ -118,6 +118,17 @@
   border-color: var(--ut-orange);
 }
 
+/* Force pointer cursor for all dropdown menu items */
+[data-radix-collection-item] {
+  cursor: pointer !important;
+}
+
+/* Alternative selector for dropdown menu items */
+.dropdown-menu-item,
+[role="menuitem"] {
+  cursor: pointer !important;
+}
+
 .hover\:text-ut-orange:hover {
   color: var(--ut-orange);
 }
