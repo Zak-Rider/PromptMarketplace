@@ -133,7 +133,7 @@ export default function Header() {
                 <>
                   <Button 
                     variant="outline" 
-                    className="border-oxford-blue text-oxford-blue bg-white hover:bg-oxford-blue hover:text-white hover:border-oxford-blue transition-colors"
+                    className="border-oxford-blue text-oxford-blue bg-white hover:!bg-oxford-blue hover:!text-white hover:!border-oxford-blue transition-colors"
                     onClick={() => navigateToAuth('login')}
                   >
                     Sign In
@@ -203,7 +203,7 @@ export default function Header() {
                 <>
                   <Button 
                     variant="outline" 
-                    className="flex-1 border-oxford-blue text-oxford-blue bg-white hover:bg-oxford-blue hover:text-white hover:border-oxford-blue transition-colors"
+                    className="flex-1 border-oxford-blue text-oxford-blue bg-white hover:!bg-oxford-blue hover:!text-white hover:!border-oxford-blue transition-colors"
                     onClick={() => navigateToAuth('login')}
                   >
                     Sign In
