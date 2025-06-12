@@ -18,16 +18,14 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const { loginMutation, registerMutation, user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
-  // Check URL parameters to determine initial mode
+  // Check URL parameters to determine mode whenever the location changes
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
-    if (mode === 'signup') {
-      setIsLogin(false);
-    }
-  }, []);
+    setIsLogin(mode !== 'signup');
+  }, [location]); // React to location changes
 
   // Redirect if already logged in
   if (user) {
