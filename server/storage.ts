@@ -5,6 +5,8 @@ import {
   type CartItem, type InsertCartItem, type Review, type InsertReview,
   type Purchase, type InsertPurchase, type PromptWithDetails
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -450,4 +452,263 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        avatar: insertUser.avatar || null
+      })
+      .returning();
+    return user;
+  }
+
+  async getAllCategories(): Promise<Category[]> {
+    return await db.select().from(categories);
+  }
+
+  async getCategoryById(id: number): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.id, id));
+    return category || undefined;
+  }
+
+  async getCategoryBySlug(slug: string): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.slug, slug));
+    return category || undefined;
+  }
+
+  async createCategory(insertCategory: InsertCategory): Promise<Category> {
+    const [category] = await db
+      .insert(categories)
+      .values({
+        ...insertCategory,
+        description: insertCategory.description || null
+      })
+      .returning();
+    return category;
+  }
+
+  async getAllPrompts(filters?: {
+    categoryId?: number;
+    search?: string;
+    featured?: boolean;
+    trending?: boolean;
+    isNew?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<PromptWithDetails[]> {
+    let query = db.select().from(prompts);
+
+    if (filters?.categoryId) {
+      query = query.where(eq(prompts.categoryId, filters.categoryId));
+    }
+
+    const promptResults = await query;
+    let filteredPrompts = promptResults;
+
+    if (filters?.search) {
+      const searchLower = filters.search.toLowerCase();
+      filteredPrompts = filteredPrompts.filter(p => 
+        p.title.toLowerCase().includes(searchLower) ||
+        p.description.toLowerCase().includes(searchLower) ||
+        p.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    }
+
+    if (filters?.featured !== undefined) {
+      filteredPrompts = filteredPrompts.filter(p => p.featured === filters.featured);
+    }
+
+    if (filters?.trending !== undefined) {
+      filteredPrompts = filteredPrompts.filter(p => p.trending === filters.trending);
+    }
+
+    if (filters?.isNew !== undefined) {
+      filteredPrompts = filteredPrompts.filter(p => p.isNew === filters.isNew);
+    }
+
+    // Sort by creation date (newest first)
+    filteredPrompts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    if (filters?.offset) {
+      filteredPrompts = filteredPrompts.slice(filters.offset);
+    }
+
+    if (filters?.limit) {
+      filteredPrompts = filteredPrompts.slice(0, filters.limit);
+    }
+
+    return Promise.all(filteredPrompts.map(async prompt => await this.enrichPromptWithDetails(prompt)));
+  }
+
+  async getPromptById(id: number): Promise<PromptWithDetails | undefined> {
+    const [prompt] = await db.select().from(prompts).where(eq(prompts.id, id));
+    if (!prompt) return undefined;
+    return this.enrichPromptWithDetails(prompt);
+  }
+
+  async createPrompt(insertPrompt: InsertPrompt): Promise<Prompt> {
+    const [prompt] = await db
+      .insert(prompts)
+      .values({
+        ...insertPrompt,
+        featured: insertPrompt.featured || null,
+        trending: insertPrompt.trending || null,
+        isNew: insertPrompt.isNew || null,
+        tags: insertPrompt.tags || null,
+        previewImage: insertPrompt.previewImage || null
+      })
+      .returning();
+    return prompt;
+  }
+
+  async updatePrompt(id: number, updates: Partial<InsertPrompt>): Promise<Prompt | undefined> {
+    const [prompt] = await db
+      .update(prompts)
+      .set(updates)
+      .where(eq(prompts.id, id))
+      .returning();
+    return prompt || undefined;
+  }
+
+  private async enrichPromptWithDetails(prompt: Prompt): Promise<PromptWithDetails> {
+    const category = await this.getCategoryById(prompt.categoryId);
+    const author = await this.getUser(prompt.authorId);
+    const reviewCount = await this.getReviewCount(prompt.id);
+
+    return {
+      ...prompt,
+      category: category!,
+      author: {
+        id: author!.id,
+        username: author!.username,
+        avatar: author!.avatar,
+      },
+      reviewCount,
+    };
+  }
+
+  async getUserFavorites(userId: number): Promise<PromptWithDetails[]> {
+    const userFavorites = await db.select().from(favorites).where(eq(favorites.userId, userId));
+    
+    const promptPromises = userFavorites.map(fav => this.getPromptById(fav.promptId));
+    const promptResults = await Promise.all(promptPromises);
+    
+    return promptResults.filter(Boolean) as PromptWithDetails[];
+  }
+
+  async addToFavorites(insertFavorite: InsertFavorite): Promise<Favorite> {
+    const [favorite] = await db
+      .insert(favorites)
+      .values(insertFavorite)
+      .returning();
+    return favorite;
+  }
+
+  async removeFromFavorites(userId: number, promptId: number): Promise<boolean> {
+    const result = await db
+      .delete(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.promptId, promptId)));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async isFavorited(userId: number, promptId: number): Promise<boolean> {
+    const [favorite] = await db
+      .select()
+      .from(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.promptId, promptId)));
+    return !!favorite;
+  }
+
+  async getUserCart(userId: number): Promise<PromptWithDetails[]> {
+    const userCartItems = await db.select().from(cartItems).where(eq(cartItems.userId, userId));
+    
+    const promptPromises = userCartItems.map(item => this.getPromptById(item.promptId));
+    const promptResults = await Promise.all(promptPromises);
+    
+    return promptResults.filter(Boolean) as PromptWithDetails[];
+  }
+
+  async addToCart(insertCartItem: InsertCartItem): Promise<CartItem> {
+    const [cartItem] = await db
+      .insert(cartItems)
+      .values(insertCartItem)
+      .returning();
+    return cartItem;
+  }
+
+  async removeFromCart(userId: number, promptId: number): Promise<boolean> {
+    const result = await db
+      .delete(cartItems)
+      .where(and(eq(cartItems.userId, userId), eq(cartItems.promptId, promptId)));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async clearCart(userId: number): Promise<boolean> {
+    await db.delete(cartItems).where(eq(cartItems.userId, userId));
+    return true;
+  }
+
+  async isInCart(userId: number, promptId: number): Promise<boolean> {
+    const [cartItem] = await db
+      .select()
+      .from(cartItems)
+      .where(and(eq(cartItems.userId, userId), eq(cartItems.promptId, promptId)));
+    return !!cartItem;
+  }
+
+  async getPromptReviews(promptId: number): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.promptId, promptId));
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db
+      .insert(reviews)
+      .values({
+        ...insertReview,
+        comment: insertReview.comment || null
+      })
+      .returning();
+    return review;
+  }
+
+  async getReviewCount(promptId: number): Promise<number> {
+    const reviewResults = await db.select().from(reviews).where(eq(reviews.promptId, promptId));
+    return reviewResults.length;
+  }
+
+  async createPurchase(insertPurchase: InsertPurchase): Promise<Purchase> {
+    const [purchase] = await db
+      .insert(purchases)
+      .values(insertPurchase)
+      .returning();
+    return purchase;
+  }
+
+  async getUserPurchases(userId: number): Promise<PromptWithDetails[]> {
+    const userPurchases = await db.select().from(purchases).where(eq(purchases.userId, userId));
+    
+    const promptPromises = userPurchases.map(purchase => this.getPromptById(purchase.promptId));
+    const promptResults = await Promise.all(promptPromises);
+    
+    return promptResults.filter(Boolean) as PromptWithDetails[];
+  }
+}
+
+export const storage = new DatabaseStorage();
