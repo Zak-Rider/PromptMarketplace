@@ -225,6 +225,7 @@ export class MemStorage implements IStorage {
   // Prompt methods
   async getAllPrompts(filters?: {
     categoryId?: number;
+    authorId?: number;
     search?: string;
     featured?: boolean;
     trending?: boolean;
@@ -236,6 +237,10 @@ export class MemStorage implements IStorage {
 
     if (filters?.categoryId) {
       prompts = prompts.filter(p => p.categoryId === filters.categoryId);
+    }
+
+    if (filters?.authorId) {
+      prompts = prompts.filter(p => p.authorId === filters.authorId);
     }
 
     if (filters?.search) {
@@ -518,6 +523,10 @@ export class DatabaseStorage implements IStorage {
 
     if (filters?.categoryId) {
       query = query.where(eq(prompts.categoryId, filters.categoryId));
+    }
+
+    if (filters?.authorId) {
+      query = query.where(eq(prompts.authorId, filters.authorId));
     }
 
     const promptResults = await query;
