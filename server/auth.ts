@@ -1,21 +1,26 @@
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
-import session from "express-session";
+import { Express, Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser, insertUserSchema, loginSchema } from "@shared/schema";
-import connectPg from "connect-pg-simple";
-import { pool } from "./db";
+
+interface JwtPayload {
+  userId: number;
+  username: string;
+  email: string;
+}
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface Request {
+      user?: SelectUser;
+    }
   }
 }
 
 const scryptAsync = promisify(scrypt);
+const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret-change-in-production";
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -30,57 +35,79 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-export function setupAuth(app: Express) {
-  // Create PostgreSQL session store
-  const PostgresSessionStore = connectPg(session);
-  
-  const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
-    resave: false,
-    saveUninitialized: false,
-    store: new PostgresSessionStore({
-      pool,
-      createTableIfMissing: true,
-    }),
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    },
+function generateToken(user: SelectUser): string {
+  const payload: JwtPayload = {
+    userId: user.id,
+    username: user.username,
+    email: user.email,
   };
-
-  app.set("trust proxy", 1);
-  app.use(session(sessionSettings));
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false, { message: "Invalid username or password" });
-        }
-        return done(null, user);
-      } catch (error) {
-        return done(error);
-      }
-    }),
-  );
-
-  passport.serializeUser((user, done) => done(null, user.id));
   
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user || false);
-    } catch (error) {
-      done(error);
-    }
+  return jwt.sign(payload, JWT_SECRET, { 
+    expiresIn: "7d",
+    issuer: "buy-sell-prompt",
+    audience: "buy-sell-prompt-users"
   });
+}
 
+// JWT Authentication middleware
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Access token required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    
+    // Get full user data
+    storage.getUser(decoded.userId).then(user => {
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      req.user = user;
+      next();
+    }).catch(error => {
+      console.error("Auth middleware error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    });
+  } catch (error) {
+    console.error("JWT verification error:", error);
+    return res.status(403).json({ error: "Invalid or expired token" });
+  }
+}
+
+// Optional authentication middleware (doesn't fail if no token)
+export function optionalAuth(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    
+    storage.getUser(decoded.userId).then(user => {
+      if (user) {
+        req.user = user;
+      }
+      next();
+    }).catch(error => {
+      console.error("Optional auth error:", error);
+      next();
+    });
+  } catch (error) {
+    // Invalid token, but don't fail the request
+    next();
+  }
+}
+
+export function setupAuth(app: Express) {
   // Register endpoint
-  app.post("/api/register", async (req, res, next) => {
+  app.post("/api/register", async (req, res) => {
     try {
       const validatedData = insertUserSchema.parse(req.body);
       
@@ -100,15 +127,17 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json({
+      const token = generateToken(user);
+      
+      res.status(201).json({
+        user: {
           id: user.id,
           username: user.username,
           email: user.email,
           avatar: user.avatar,
           createdAt: user.createdAt,
-        });
+        },
+        token,
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -120,47 +149,46 @@ export function setupAuth(app: Express) {
   });
 
   // Login endpoint
-  app.post("/api/login", (req, res, next) => {
+  app.post("/api/login", async (req, res) => {
     try {
-      loginSchema.parse(req.body);
-    } catch (error) {
-      return res.status(400).json({ error: "Invalid login data" });
-    }
-
-    passport.authenticate("local", (err: any, user: SelectUser | false, info: any) => {
-      if (err) return next(err);
-      if (!user) {
-        return res.status(401).json({ error: info?.message || "Authentication failed" });
-      }
+      const validatedData = loginSchema.parse(req.body);
       
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.json({
+      const user = await storage.getUserByUsername(validatedData.username);
+      if (!user || !(await comparePasswords(validatedData.password, user.password))) {
+        return res.status(401).json({ error: "Invalid username or password" });
+      }
+
+      const token = generateToken(user);
+      
+      res.json({
+        user: {
           id: user.id,
           username: user.username,
           email: user.email,
           avatar: user.avatar,
           createdAt: user.createdAt,
-        });
+        },
+        token,
       });
-    })(req, res, next);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    }
   });
 
-  // Logout endpoint
-  app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
-      if (err) return next(err);
-      res.sendStatus(200);
-    });
+  // Logout endpoint (client-side token removal)
+  app.post("/api/logout", (req, res) => {
+    // With JWT, logout is handled client-side by removing the token
+    // For server-side logout, you'd need a token blacklist
+    res.json({ message: "Logged out successfully" });
   });
 
   // Get current user endpoint
-  app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-    
-    const user = req.user as SelectUser;
+  app.get("/api/user", authenticateToken, (req, res) => {
+    const user = req.user!;
     res.json({
       id: user.id,
       username: user.username,
