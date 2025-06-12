@@ -18,13 +18,13 @@ export default function Footer() {
               The world's largest marketplace for premium AI prompts. Create, discover, and monetize AI content.
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue rounded-lg hover:bg-ut-orange">
+              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange transition-colors">
                 <i className="fab fa-twitter"></i>
               </Button>
-              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue rounded-lg hover:bg-ut-orange">
+              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange transition-colors">
                 <i className="fab fa-discord"></i>
               </Button>
-              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue rounded-lg hover:bg-ut-orange">
+              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange transition-colors">
                 <i className="fab fa-github"></i>
               </Button>
             </div>
