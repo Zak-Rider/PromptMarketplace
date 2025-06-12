@@ -37,15 +37,15 @@ export default function Home() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/browse">
-                  <Button size="lg" className="btn-ut-orange shadow-lg">
+                <Link href="/browse" className="w-full sm:w-auto">
+                  <Button size="lg" className="btn-ut-orange shadow-lg w-full sm:w-auto">
                     <Search className="w-5 h-5 mr-2" />
                     Browse Prompts
                   </Button>
                 </Link>
                 <Button 
                   size="lg" 
-                  className="btn-outline-white"
+                  className="btn-outline-white w-full sm:w-auto"
                 >
                   <Upload className="w-5 h-5 mr-2" />
                   Start Selling
