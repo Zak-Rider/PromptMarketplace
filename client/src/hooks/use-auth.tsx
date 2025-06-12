@@ -119,8 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Welcome back!",
         description: `Successfully logged in as ${authResponse.user.username}`,
       });
-      // Auto-redirect to dashboard
-      window.location.href = "/dashboard";
+      // Auto-redirect to dashboard using wouter navigation
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('navigate-to-dashboard'));
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
@@ -148,8 +150,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Account created!",
         description: `Welcome to Buy Sell Prompt, ${authResponse.user.username}!`,
       });
-      // Auto-redirect to dashboard
-      window.location.href = "/dashboard";
+      // Auto-redirect to dashboard using wouter navigation
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('navigate-to-dashboard'));
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
