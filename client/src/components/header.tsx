@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Search, Heart, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { PromptWithDetails } from "@shared/schema";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,12 +21,14 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logoutMutation } = useAuth();
 
-  const { data: cartItems = [] } = useQuery({
+  const { data: cartItems = [] } = useQuery<PromptWithDetails[]>({
     queryKey: ["/api/cart"],
+    enabled: !!user,
   });
 
-  const { data: favorites = [] } = useQuery({
+  const { data: favorites = [] } = useQuery<PromptWithDetails[]>({
     queryKey: ["/api/favorites"],
+    enabled: !!user,
   });
 
   useEffect(() => {

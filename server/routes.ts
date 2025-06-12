@@ -55,10 +55,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Favorites (mock user ID for now)
-  app.get("/api/favorites", async (req, res) => {
+  // Favorites - requires authentication
+  app.get("/api/favorites", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       const favorites = await storage.getUserFavorites(userId);
       res.json(favorites);
     } catch (error) {
@@ -66,9 +66,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/favorites", async (req, res) => {
+  app.post("/api/favorites", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       const validatedData = insertFavoriteSchema.parse({
         ...req.body,
         userId
@@ -90,9 +90,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/favorites/:promptId", async (req, res) => {
+  app.delete("/api/favorites/:promptId", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       const promptId = parseInt(req.params.promptId);
       
       const removed = await storage.removeFromFavorites(userId, promptId);
@@ -107,9 +107,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cart
-  app.get("/api/cart", async (req, res) => {
+  app.get("/api/cart", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       const cartItems = await storage.getUserCart(userId);
       res.json(cartItems);
     } catch (error) {
@@ -117,9 +117,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", async (req, res) => {
+  app.post("/api/cart", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       const validatedData = insertCartItemSchema.parse({
         ...req.body,
         userId
@@ -141,9 +141,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/:promptId", async (req, res) => {
+  app.delete("/api/cart/:promptId", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       const promptId = parseInt(req.params.promptId);
       
       const removed = await storage.removeFromCart(userId, promptId);
@@ -157,9 +157,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart", async (req, res) => {
+  app.delete("/api/cart", authenticateToken, async (req, res) => {
     try {
-      const userId = 1; // Mock user ID
+      const userId = req.user!.id;
       await storage.clearCart(userId);
       res.json({ message: "Cart cleared" });
     } catch (error) {
