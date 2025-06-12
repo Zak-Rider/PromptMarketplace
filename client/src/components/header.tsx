@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { Brain, Search, Heart, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
+import { Brain, Search, Heart, ShoppingCart, Menu, X, User, LogOut, BarChart3 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PromptWithDetails } from "@shared/schema";
 import {
@@ -127,6 +127,12 @@ export default function Header() {
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="flex items-center">
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       onClick={() => logoutMutation.mutate()}
@@ -193,9 +199,18 @@ export default function Header() {
                 Categories
               </Button>
             </Link>
-            <Button variant="ghost" className="w-full justify-start text-oxford-blue hover:text-ut-orange font-medium">
-              Sell Prompts
-            </Button>
+            {user ? (
+              <Link href="/dashboard">
+                <Button variant="ghost" className="w-full justify-start text-oxford-blue hover:text-ut-orange font-medium">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="ghost" className="w-full justify-start text-oxford-blue hover:text-ut-orange font-medium">
+                Sell Prompts
+              </Button>
+            )}
             
             <div className="flex space-x-2 pt-4">
               {user ? (
