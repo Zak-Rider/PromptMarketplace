@@ -19,10 +19,12 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { loginMutation, registerMutation, user } = useAuth();
   
-  // Determine mode directly from URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
+  // Determine mode directly from URL parameters using wouter location
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const mode = urlParams.get('mode');
   const isLogin = mode !== 'signup';
+  
+  console.log('Auth page render - location:', location, 'mode:', mode, 'isLogin:', isLogin);
   
   // Redirect if already logged in
   if (user) {
