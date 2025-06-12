@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Brain } from "lucide-react";
+import { Brain, Twitter, MessageCircle, Github, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Footer() {
@@ -18,14 +18,14 @@ export default function Footer() {
               The world's largest marketplace for premium AI prompts. Create, discover, and monetize AI content.
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange transition-colors">
-                <i className="fab fa-twitter"></i>
+              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange hover:text-white transition-colors">
+                <Twitter className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange transition-colors">
-                <i className="fab fa-discord"></i>
+              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange hover:text-white transition-colors">
+                <MessageCircle className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange transition-colors">
-                <i className="fab fa-github"></i>
+              <Button variant="ghost" size="icon" className="w-10 h-10 bg-oxford-blue text-white rounded-lg hover:bg-ut-orange hover:text-white transition-colors">
+                <Github className="w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -115,11 +115,11 @@ export default function Footer() {
           </p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <span className="text-gray-400 text-sm">Payment Methods:</span>
-            <div className="flex space-x-2 text-xl text-gray-400">
-              <i className="fab fa-cc-visa"></i>
-              <i className="fab fa-cc-mastercard"></i>
-              <i className="fab fa-cc-paypal"></i>
-              <i className="fab fa-cc-stripe"></i>
+            <div className="flex space-x-2 text-gray-400">
+              <CreditCard className="w-6 h-6" />
+              <CreditCard className="w-6 h-6" />
+              <CreditCard className="w-6 h-6" />
+              <CreditCard className="w-6 h-6" />
             </div>
           </div>
         </div>
