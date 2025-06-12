@@ -512,6 +512,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllPrompts(filters?: {
     categoryId?: number;
+    authorId?: number;
     search?: string;
     featured?: boolean;
     trending?: boolean;

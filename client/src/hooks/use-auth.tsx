@@ -119,6 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Welcome back!",
         description: `Successfully logged in as ${authResponse.user.username}`,
       });
+      // Auto-redirect to dashboard
+      window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({
@@ -146,6 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Account created!",
         description: `Welcome to Buy Sell Prompt, ${authResponse.user.username}!`,
       });
+      // Auto-redirect to dashboard
+      window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({
