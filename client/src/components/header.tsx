@@ -22,6 +22,7 @@ export default function Header() {
   const { user, logoutMutation } = useAuth();
 
   const navigateToAuth = (mode: 'login' | 'signup') => {
+    console.log('Header navigation clicked:', mode);
     setLocation(`/auth?mode=${mode}`);
   };
 

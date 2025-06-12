@@ -256,7 +256,11 @@ export default function AuthPage() {
             <div className="text-center">
               <Button
                 variant="link"
-                onClick={() => setLocation(isLogin ? '/auth?mode=signup' : '/auth?mode=login')}
+                onClick={() => {
+                  const newUrl = isLogin ? '/auth?mode=signup' : '/auth?mode=login';
+                  console.log('Form toggle button clicked, navigating to:', newUrl);
+                  setLocation(newUrl);
+                }}
                 className="text-ut-orange hover:text-ut-orange/80"
               >
                 {isLogin 
