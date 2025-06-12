@@ -15,24 +15,15 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof insertUserSchema>;
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [location, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { loginMutation, registerMutation, user } = useAuth();
-  const [location, setLocation] = useLocation();
-
-  // Check URL parameters to determine mode whenever the location changes
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    console.log('Auth page - URL changed, mode:', mode, 'isLogin will be:', mode !== 'signup');
-    const newIsLogin = mode !== 'signup';
-    setIsLogin(newIsLogin);
-    
-    // Reset forms when switching modes
-    loginForm.reset();
-    registerForm.reset();
-  }, [location]); // React to location changes
-
+  
+  // Determine mode directly from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode');
+  const isLogin = mode !== 'signup';
+  
   // Redirect if already logged in
   if (user) {
     setLocation("/");
@@ -98,7 +89,6 @@ export default function AuthPage() {
           </CardHeader>
           
           <CardContent className="space-y-6">
-            {console.log('Rendering form, isLogin:', isLogin)}
             {isLogin ? (
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
@@ -264,7 +254,7 @@ export default function AuthPage() {
             <div className="text-center">
               <Button
                 variant="link"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => setLocation(isLogin ? '/auth?mode=signup' : '/auth?mode=login')}
                 className="text-ut-orange hover:text-ut-orange/80"
               >
                 {isLogin 
