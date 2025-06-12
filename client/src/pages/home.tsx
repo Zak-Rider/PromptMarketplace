@@ -254,15 +254,15 @@ export default function Home() {
       </section>
 
       {/* Seller CTA */}
-      <section className="py-16 bg-gradient-to-r from-oxford-blue to-rich-black text-white">
+      <section className="py-16 bg-gradient-oxford-black text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl font-bold">
+              <h2 className="text-3xl md:text-4xl font-bold text-white">
                 Start Earning with Your
                 <span className="text-ut-orange"> AI Prompts</span>
               </h2>
-              <p className="text-xl text-gray-300 leading-relaxed">
+              <p className="text-xl text-white/90 leading-relaxed">
                 Join thousands of creators earning passive income by selling their premium AI prompts. 
                 Set your own prices and keep up to 80% of your sales.
               </p>
@@ -270,19 +270,19 @@ export default function Home() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-6 h-6 text-ut-orange flex-shrink-0" />
-                  <span className="text-lg">Free to list your prompts</span>
+                  <span className="text-lg text-white">Free to list your prompts</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-6 h-6 text-ut-orange flex-shrink-0" />
-                  <span className="text-lg">Keep up to 80% of sales revenue</span>
+                  <span className="text-lg text-white">Keep up to 80% of sales revenue</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-6 h-6 text-ut-orange flex-shrink-0" />
-                  <span className="text-lg">Built-in marketing and promotion</span>
+                  <span className="text-lg text-white">Built-in marketing and promotion</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-6 h-6 text-ut-orange flex-shrink-0" />
-                  <span className="text-lg">Analytics and performance tracking</span>
+                  <span className="text-lg text-white">Analytics and performance tracking</span>
                 </div>
               </div>
               
