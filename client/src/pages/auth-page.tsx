@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,15 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { loginMutation, registerMutation, user } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Check URL parameters to determine initial mode
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    if (mode === 'signup') {
+      setIsLogin(false);
+    }
+  }, []);
 
   // Redirect if already logged in
   if (user) {

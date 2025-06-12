@@ -129,7 +129,7 @@ export default function Header() {
                       Sign In
                     </Button>
                   </Link>
-                  <Link href="/auth">
+                  <Link href="/auth?mode=signup">
                     <Button className="bg-ut-orange text-white hover:bg-ut-orange/90">
                       Sign Up
                     </Button>
@@ -180,12 +180,29 @@ export default function Header() {
             </Button>
             
             <div className="flex space-x-2 pt-4">
-              <Button variant="outline" className="flex-1 border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
-                Sign In
-              </Button>
-              <Button className="flex-1 bg-ut-orange text-white hover:bg-ut-orange/90">
-                Sign Up
-              </Button>
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  className="flex-1 border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white"
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending}
+                >
+                  {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                </Button>
+              ) : (
+                <>
+                  <Link href="/auth" className="flex-1">
+                    <Button variant="outline" className="w-full border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/auth?mode=signup" className="flex-1">
+                    <Button className="w-full bg-ut-orange text-white hover:bg-ut-orange/90">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
