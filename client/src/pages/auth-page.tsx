@@ -17,13 +17,13 @@ type RegisterFormData = z.infer<typeof insertUserSchema>;
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const [mode, setMode] = useState<string | null>(null);
+  const [mode, setMode] = useState<string>('login');
   const { loginMutation, registerMutation, user } = useAuth();
   
   // Handle URL parameters and redirects in useEffect
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const urlMode = urlParams.get('mode');
+    const urlMode = urlParams.get('mode') || 'login'; // Default to login if no mode
     setMode(urlMode);
     
     // Redirect if already logged in
@@ -34,13 +34,13 @@ export default function AuthPage() {
     
     const handlePopState = () => {
       const newUrlParams = new URLSearchParams(window.location.search);
-      const newMode = newUrlParams.get('mode');
+      const newMode = newUrlParams.get('mode') || 'login';
       setMode(newMode);
     };
     
     const handleAuthModeChange = () => {
       const newUrlParams = new URLSearchParams(window.location.search);
-      const newMode = newUrlParams.get('mode');
+      const newMode = newUrlParams.get('mode') || 'login';
       setMode(newMode);
     };
     
@@ -54,11 +54,6 @@ export default function AuthPage() {
   }, [user, setLocation]);
   
   const isLogin = mode !== 'signup';
-  
-  // Don't render until mode is determined
-  if (mode === null) {
-    return <div>Loading...</div>;
-  }
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
