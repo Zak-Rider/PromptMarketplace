@@ -124,7 +124,7 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <>
-                  <Link href="/auth">
+                  <Link href="/auth?mode=login">
                     <Button variant="outline" className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
                       Sign In
                     </Button>
@@ -191,7 +191,7 @@ export default function Header() {
                 </Button>
               ) : (
                 <>
-                  <Link href="/auth" className="flex-1">
+                  <Link href="/auth?mode=login" className="flex-1">
                     <Button variant="outline" className="w-full border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
                       Sign In
                     </Button>

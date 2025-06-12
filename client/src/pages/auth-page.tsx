@@ -24,7 +24,7 @@ export default function AuthPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
-    setIsLogin(mode !== 'signup');
+    setIsLogin(mode === 'login' || mode !== 'signup');
   }, [location]); // React to location changes
 
   // Redirect if already logged in
