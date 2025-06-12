@@ -24,7 +24,13 @@ export default function AuthPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
-    setIsLogin(mode === 'login' || mode !== 'signup');
+    console.log('Auth page - URL changed, mode:', mode, 'isLogin will be:', mode !== 'signup');
+    const newIsLogin = mode !== 'signup';
+    setIsLogin(newIsLogin);
+    
+    // Reset forms when switching modes
+    loginForm.reset();
+    registerForm.reset();
   }, [location]); // React to location changes
 
   // Redirect if already logged in
@@ -79,7 +85,7 @@ export default function AuthPage() {
           </p>
         </div>
 
-        <Card className="bg-white shadow-2xl">
+        <Card className="bg-white shadow-2xl" key={isLogin ? 'login' : 'signup'}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-oxford-blue">
               {isLogin ? "Sign In" : "Create Account"}
@@ -92,6 +98,7 @@ export default function AuthPage() {
           </CardHeader>
           
           <CardContent className="space-y-6">
+            {console.log('Rendering form, isLogin:', isLogin)}
             {isLogin ? (
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
