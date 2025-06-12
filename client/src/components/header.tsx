@@ -16,10 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logoutMutation } = useAuth();
+
+  const navigateToAuth = (mode: 'login' | 'signup') => {
+    setLocation(`/auth?mode=${mode}`);
+  };
 
   const { data: cartItems = [] } = useQuery<PromptWithDetails[]>({
     queryKey: ["/api/cart"],
@@ -124,16 +128,19 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <>
-                  <Link href="/auth?mode=login">
-                    <Button variant="outline" className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth?mode=signup">
-                    <Button className="bg-ut-orange text-white hover:bg-ut-orange/90">
-                      Sign Up
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="outline" 
+                    className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white"
+                    onClick={() => navigateToAuth('login')}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    className="bg-ut-orange text-white hover:bg-ut-orange/90"
+                    onClick={() => navigateToAuth('signup')}
+                  >
+                    Sign Up
+                  </Button>
                 </>
               )}
             </div>
@@ -191,16 +198,19 @@ export default function Header() {
                 </Button>
               ) : (
                 <>
-                  <Link href="/auth?mode=login" className="flex-1">
-                    <Button variant="outline" className="w-full border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth?mode=signup" className="flex-1">
-                    <Button className="w-full bg-ut-orange text-white hover:bg-ut-orange/90">
-                      Sign Up
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white"
+                    onClick={() => navigateToAuth('login')}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    className="flex-1 bg-ut-orange text-white hover:bg-ut-orange/90"
+                    onClick={() => navigateToAuth('signup')}
+                  >
+                    Sign Up
+                  </Button>
                 </>
               )}
             </div>
