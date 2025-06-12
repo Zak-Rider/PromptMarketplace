@@ -44,7 +44,7 @@ export default function AuthPage() {
   const mode = urlParams.get('mode');
   const isLogin = mode !== 'signup';
   
-  console.log('Auth page render - window.location.search:', window.location.search, 'mode:', mode, 'isLogin:', isLogin);
+
   
   // Redirect if already logged in
   if (user) {
@@ -278,7 +278,6 @@ export default function AuthPage() {
                 variant="link"
                 onClick={() => {
                   const newUrl = isLogin ? '/auth?mode=signup' : '/auth?mode=login';
-                  console.log('Form toggle button clicked, navigating to:', newUrl);
                   window.history.pushState({}, '', newUrl);
                   window.dispatchEvent(new CustomEvent('authModeChange'));
                 }}

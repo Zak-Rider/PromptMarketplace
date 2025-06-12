@@ -22,11 +22,8 @@ export default function Header() {
   const { user, logoutMutation } = useAuth();
 
   const navigateToAuth = (mode: 'login' | 'signup') => {
-    console.log('Header navigation clicked:', mode);
     // Use window.history to preserve query parameters
     window.history.pushState({}, '', `/auth?mode=${mode}`);
-    // Force navigation to auth page - wouter will handle the route
-    setLocation('/auth');
     // Dispatch a custom event to trigger auth page re-render
     window.dispatchEvent(new CustomEvent('authModeChange'));
   };
@@ -136,13 +133,13 @@ export default function Header() {
                 <>
                   <Button 
                     variant="outline" 
-                    className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white"
+                    className="border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white transition-colors"
                     onClick={() => navigateToAuth('login')}
                   >
                     Sign In
                   </Button>
                   <Button 
-                    className="bg-ut-orange text-white hover:bg-ut-orange/90"
+                    className="bg-ut-orange text-white hover:bg-ut-orange/90 hover:text-white transition-colors"
                     onClick={() => navigateToAuth('signup')}
                   >
                     Sign Up
@@ -206,13 +203,13 @@ export default function Header() {
                 <>
                   <Button 
                     variant="outline" 
-                    className="flex-1 border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white"
+                    className="flex-1 border-oxford-blue text-oxford-blue hover:bg-oxford-blue hover:text-white transition-colors"
                     onClick={() => navigateToAuth('login')}
                   >
                     Sign In
                   </Button>
                   <Button 
-                    className="flex-1 bg-ut-orange text-white hover:bg-ut-orange/90"
+                    className="flex-1 bg-ut-orange text-white hover:bg-ut-orange/90 hover:text-white transition-colors"
                     onClick={() => navigateToAuth('signup')}
                   >
                     Sign Up
