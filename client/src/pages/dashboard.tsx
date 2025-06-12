@@ -16,7 +16,9 @@ import {
   Eye,
   Edit,
   Download,
-  Trash2
+  Trash2,
+  Menu,
+  X
 } from "lucide-react";
 import { useState } from "react";
 
@@ -25,6 +27,7 @@ type TabType = "overview" | "prompts" | "purchases" | "favorites" | "settings";
 export default function Dashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Fetch user's prompts
   const { data: userPrompts = [], isLoading: promptsLoading } = useQuery<PromptWithDetails[]>({
@@ -130,7 +133,7 @@ export default function Dashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {userPrompts.slice(0, 3).map((prompt) => (
-                    <div key={prompt.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <div key={prompt.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 space-y-2 sm:space-y-0">
                       <div className="flex-1">
                         <h4 className="font-medium text-slate-900 dark:text-white">{prompt.title}</h4>
                         <p className="text-sm text-slate-600 dark:text-slate-400">{prompt.category.name}</p>
@@ -155,14 +158,14 @@ export default function Dashboard() {
       case "prompts":
         return (
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div>
                 <CardTitle className="text-slate-900 dark:text-white">My Prompts</CardTitle>
                 <CardDescription className="text-slate-600 dark:text-slate-400">
                   Manage and track your published prompts
                 </CardDescription>
               </div>
-              <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+              <Button className="bg-orange-600 hover:bg-orange-700 text-white w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Create New Prompt
               </Button>
@@ -402,11 +405,34 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="flex h-screen">
+      <div className="flex h-screen relative">
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-slate-800 rounded-lg shadow-md border border-slate-200 dark:border-slate-700"
+        >
+          {sidebarOpen ? (
+            <X className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+          ) : (
+            <Menu className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+          )}
+        </button>
+
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Left Sidebar */}
-        <div className="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col">
+        <div className={`
+          fixed lg:relative lg:translate-x-0 z-40 h-full w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}>
           {/* Header */}
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700 mt-12 lg:mt-0">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
                 <User className="h-5 w-5 text-white" />
@@ -424,7 +450,10 @@ export default function Dashboard() {
               {sidebarTabs.map((tab) => (
                 <li key={tab.id}>
                   <button
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setSidebarOpen(false); // Close sidebar on mobile after selection
+                    }}
                     className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                       activeTab === tab.id
                         ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300"
@@ -441,13 +470,13 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+        <div className="flex-1 overflow-auto lg:ml-0">
+          <div className="p-4 lg:p-8 pt-16 lg:pt-8">
+            <div className="mb-6 lg:mb-8">
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
                 {sidebarTabs.find(tab => tab.id === activeTab)?.label}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-2">
+              <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm lg:text-base">
                 {activeTab === "overview" && "Overview of your account and recent activity"}
                 {activeTab === "prompts" && "Manage and track your published prompts"}
                 {activeTab === "purchases" && "View your purchase history and downloaded prompts"}
