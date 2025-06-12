@@ -167,6 +167,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User's own prompts - requires authentication
+  app.get("/api/prompts/my-prompts", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const prompts = await storage.getAllPrompts({ authorId: userId });
+      res.json(prompts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user prompts" });
+    }
+  });
+
+  // User's purchases - requires authentication
+  app.get("/api/purchases", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const purchases = await storage.getUserPurchases(userId);
+      res.json(purchases);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch purchases" });
+    }
+  });
+
   // Reviews
   app.get("/api/prompts/:id/reviews", async (req, res) => {
     try {

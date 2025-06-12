@@ -65,9 +65,17 @@ export default function Header() {
                   Categories
                 </Button>
               </Link>
-              <Button variant="ghost" className="text-oxford-blue hover:text-ut-orange font-medium">
-                Sell Prompts
-              </Button>
+              {user ? (
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="text-oxford-blue hover:text-ut-orange font-medium">
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <Button variant="ghost" className="text-oxford-blue hover:text-ut-orange font-medium">
+                  Sell Prompts
+                </Button>
+              )}
             </div>
           </div>
           

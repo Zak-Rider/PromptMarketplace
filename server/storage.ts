@@ -24,6 +24,7 @@ export interface IStorage {
   // Prompts
   getAllPrompts(filters?: {
     categoryId?: number;
+    authorId?: number;
     search?: string;
     featured?: boolean;
     trending?: boolean;

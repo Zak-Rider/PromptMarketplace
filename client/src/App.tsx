@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import Browse from "@/pages/browse";
 import Cart from "@/pages/cart";
 import Favorites from "@/pages/favorites";
+import Dashboard from "@/pages/dashboard";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -19,6 +20,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/browse" component={Browse} />
+      <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/cart" component={Cart} />
       <ProtectedRoute path="/favorites" component={Favorites} />
       <Route path="/auth" component={AuthPage} />
